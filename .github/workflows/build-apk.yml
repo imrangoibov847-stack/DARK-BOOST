@@ -1,0 +1,44 @@
+name: Build DARK BOOST APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Extract project
+        run: |
+          unzip -q DARK_BOOST_Project_with_Cloud_Build.zip -d project
+          test -f project/Dark_Boost_Android/build.gradle
+
+      - name: Build APK
+        working-directory: project/Dark_Boost_Android
+        run: gradle --no-daemon assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: DARK-BOOST-debug-APK
+          path: project/Dark_Boost_Android/app/build/outputs/apk/debug/app-debug.apk
